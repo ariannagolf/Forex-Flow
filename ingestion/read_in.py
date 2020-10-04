@@ -13,10 +13,10 @@ spark = SparkSession \
     .getOrCreate()
 
 # Postgresql credentials
-mode = "overwrite"
+mode = "append"
 url = "jdbc:postgresql://***/fx_db"
 properties = {
-    "user": "***",
+    "user": "**",
     "password": "***",
     "driver": "org.postgresql.Driver"}
 
@@ -40,10 +40,10 @@ def daily_values(df,pair):
     df1 = df.withColumn("pair",f.lit(pair)).select("pair","date","min_bid","max_bid","avg_bid","min_ask","max_ask","avg_ask")
     #df1.show()
     # Postgresql credentials
-    mode = "overwrite"
-    url = "jdbc:postgresql://***:5431/fx_db"
+    mode = "append"
+    url = "jdbc:postgresql://***/fx_db"
     properties = {
-        "user": "***",
+        "user": "**",
         "password": "***",
         "driver": "org.postgresql.Driver"}
     write_to_postgres(df1,url,mode,properties)
@@ -55,10 +55,10 @@ def read_csv(path,pair):
     daily_values(df,pair)
 
 #pairs = ['GBPUSD',"NZDUSD","AUDUSD","USDCAD","USDCHF","USDJPY"]
-pairs = ['GBPUSD']
+pairs = ['USDJPY']
 years = ['2020']
-#months = ['01','02','03','04','05','06','07','08']
-months = ['01']
+#months = ['01','02','03','04','05','06','07']
+months = ['05','06']
 
 for pair in pairs:
     for year in years:
