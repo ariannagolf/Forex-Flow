@@ -13,11 +13,11 @@ spark = SparkSession \
     .getOrCreate()
 
 # Postgresql credentials
-mode = "append"
+mode = "overwrite"
 url = "jdbc:postgresql://***/fx_db"
 properties = {
-    "user": "**",
-    "password": "**",
+    "user": "***",
+    "password": "***",
     "driver": "org.postgresql.Driver"}
 
 #-------------------------Defining Schemas-------------------------#
@@ -30,20 +30,30 @@ fx_final_struc = StructType(fields=fx_data_schema)
 
 # Defining Schema for Interest Rate data
 ir_data_schema = [StructField('location', StringType(), True),
+    StructField('indicator', StringType(), True),
+    StructField('subject', StringType(), True),
+    StructField('measure', StringType(), True),
+    StructField('frequency', StringType(), True),
     StructField('time', StringType(), True),
-    StructField('value', FloatType(), True)]
+    StructField('value', FloatType(), True),
+    StructField('flag_codes', StringType(), True)]
 ir_final_struc = StructType(fields=ir_data_schema)
 
 # Defining Schema for GDP data
 gdp_data_schema = [StructField('location', StringType(), True),
+    StructField('indicator', StringType(), True),
+    StructField('subject', StringType(), True),
+    StructField('measure', StringType(), True),
+    StructField('frequency', StringType(), True),
     StructField('time', StringType(), True),
-    StructField('value', FloatType(), True)]
+    StructField('value', FloatType(), True),
+    StructField('flag_codes', StringType(), True)]
 gdp_final_struc = StructType(fields=ir_data_schema)
 
 #-------------------------------------------------------------------#
 
-def write_fx_to_postgres(df,url,mode,properties):
-    df.write.jdbc(url=url,table = "fx_data", mode=mode, properties=properties)
+def write_fx_to_postgres(df,table,url,mode,properties):
+    df.write.jdbc(url=url,table = table, mode=mode, properties=properties)
 
 def daily_values(df,pair):
     df = df.groupBy("date").agg(
@@ -56,13 +66,13 @@ def daily_values(df,pair):
     df1 = df.withColumn("pair",f.lit(pair)).select("pair","date","min_bid","max_bid","avg_bid","min_ask","max_ask","avg_ask")
     #df1.show()
     # Postgresql credentials
-    mode = "append"
+    mode = "overwrite"
     url = "jdbc:postgresql://***/fx_db"
     properties = {
         "user": "***",
         "password": "***",
         "driver": "org.postgresql.Driver"}
-    write_fx_to_postgres(df1,url,mode,properties)
+    write_fx_to_postgres(df1,"fx_data",url,mode,properties)
 
 def read_fx_csv(path,pair,csv_schema):
     df = spark.read.csv(path,schema=csv_schema)
@@ -70,31 +80,48 @@ def read_fx_csv(path,pair,csv_schema):
     #df.show()
     daily_values(df,pair)
 
-def read_fx_csv(path,pair,csv_schema):
+def read_gdp_csv(path,csv_schema):
     df = spark.read.csv(path,schema=csv_schema)
-    df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("timestamp").orderBy('date')
+    df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("indicator","subject","measure","frequency","flag_codes").orderBy('date')
     #df.show()
-    daily_values(df,pair)
+    #daily_values(df,pair)
 
-#pairs = ['GBPUSD',"NZDUSD","AUDUSD","USDCAD","USDCHF","USDJPY"]
+def read_ir_csv(path,csv_schema):
+    df = spark.read.format("csv") \
+        .option("header", True) \
+        .schema(csv_schema) \
+        .load(path)
+    df = df.withColumn('date', f.to_date('time', 'yyyy-MM')).drop("indicator","subject","measure","frequency","flag_codes","time")
+    write_fx_to_postgres(df,"ir_data",url,mode,properties)
+    #df.show()
+    #daily_values(df,pair)
+
 pairs = ['USDJPY']
 years = ['2020']
-#months = ['01','02','03','04','05','06','07']
 months = ['05','06']
 
 for pair in pairs:
     for year in years:
         for month in months:
             path = f"s3a://historical-forex-data/DAT_ASCII_{pair}_T_{year}{month}.csv"
-            #path = "s3a:///historical-forex-data/"
             read_fx_csv(path,pair,fx_final_struc)
-path_gdp = f"s3a://historical-forex-data/GDP/GDP.csv"
-read_fx_csv(path_ir,fx_final_struc)
+
+#path_gdp = f"s3a://historical-forex-data/GDP/GDP.csv"
+#read_gdp_csv(path_gdp,gdp_final_struc)
+
 path_ir = f"s3a://historical-forex-data/interest-rate/Interest_Rate.csv"
-read_fx_csv(path_ir,fx_final_struc)
+read_ir_csv(path_ir,ir_final_struc)
+
+
 
 spark.stop()
 print("--- %s seconds ---" % (time.time() - start_time))
+
+
+
+
+
+
 
 
 
