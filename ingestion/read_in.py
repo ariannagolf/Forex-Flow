@@ -52,7 +52,7 @@ gdp_final_struc = StructType(fields=ir_data_schema)
 
 #-------------------------------------------------------------------#
 
-def write_fx_to_postgres(df,table,url,mode,properties):
+def write_to_postgres(df,table,url,mode,properties):
     df.write.jdbc(url=url,table = table, mode=mode, properties=properties)
 
 def daily_values(df,pair):
@@ -67,12 +67,7 @@ def daily_values(df,pair):
     #df1.show()
     # Postgresql credentials
     mode = "overwrite"
-    url = "jdbc:postgresql://***/fx_db"
-    properties = {
-        "user": "***",
-        "password": "***",
-        "driver": "org.postgresql.Driver"}
-    write_fx_to_postgres(df1,"fx_data",url,mode,properties)
+    write_to_postgres(df1,"fx_data",url,mode,properties)
 
 def read_fx_csv(path,pair,csv_schema):
     df = spark.read.csv(path,schema=csv_schema)
@@ -80,19 +75,19 @@ def read_fx_csv(path,pair,csv_schema):
     #df.show()
     daily_values(df,pair)
 
-def read_gdp_csv(path,csv_schema):
-    df = spark.read.csv(path,schema=csv_schema)
-    df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("indicator","subject","measure","frequency","flag_codes").orderBy('date')
-    #df.show()
-    #daily_values(df,pair)
-
 def read_ir_csv(path,csv_schema):
     df = spark.read.format("csv") \
         .option("header", True) \
         .schema(csv_schema) \
         .load(path)
     df = df.withColumn('date', f.to_date('time', 'yyyy-MM')).drop("indicator","subject","measure","frequency","flag_codes","time")
-    write_fx_to_postgres(df,"ir_data",url,mode,properties)
+    write_to_postgres(df,"ir_data",url,mode,properties)
+    #df.show()
+    #daily_values(df,pair)
+
+def read_gdp_csv(path,csv_schema):
+    df = spark.read.csv(path,schema=csv_schema)
+    df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("indicator","subject","measure","frequency","flag_codes").orderBy('date')
     #df.show()
     #daily_values(df,pair)
 
