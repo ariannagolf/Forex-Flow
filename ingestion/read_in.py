@@ -17,16 +17,32 @@ mode = "append"
 url = "jdbc:postgresql://***/fx_db"
 properties = {
     "user": "**",
-    "password": "***",
+    "password": "**",
     "driver": "org.postgresql.Driver"}
 
-# Defining scheme
-data_schema = [StructField('timestamp', StringType(), True),
+#-------------------------Defining Schemas-------------------------#
+
+# Defining Schema for Forex data
+fx_data_schema = [StructField('timestamp', StringType(), True),
     StructField('bid', FloatType(), True),
     StructField('ask', FloatType(), True)]
-final_struc = StructType(fields=data_schema)
+fx_final_struc = StructType(fields=fx_data_schema)
 
-def write_to_postgres(df,url,mode,properties):
+# Defining Schema for Interest Rate data
+ir_data_schema = [StructField('location', StringType(), True),
+    StructField('time', StringType(), True),
+    StructField('value', FloatType(), True)]
+ir_final_struc = StructType(fields=ir_data_schema)
+
+# Defining Schema for GDP data
+gdp_data_schema = [StructField('location', StringType(), True),
+    StructField('time', StringType(), True),
+    StructField('value', FloatType(), True)]
+gdp_final_struc = StructType(fields=ir_data_schema)
+
+#-------------------------------------------------------------------#
+
+def write_fx_to_postgres(df,url,mode,properties):
     df.write.jdbc(url=url,table = "fx_data", mode=mode, properties=properties)
 
 def daily_values(df,pair):
@@ -43,13 +59,19 @@ def daily_values(df,pair):
     mode = "append"
     url = "jdbc:postgresql://***/fx_db"
     properties = {
-        "user": "**",
+        "user": "***",
         "password": "***",
         "driver": "org.postgresql.Driver"}
-    write_to_postgres(df1,url,mode,properties)
+    write_fx_to_postgres(df1,url,mode,properties)
 
-def read_csv(path,pair):
-    df = spark.read.csv(path,schema=final_struc)
+def read_fx_csv(path,pair,csv_schema):
+    df = spark.read.csv(path,schema=csv_schema)
+    df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("timestamp").orderBy('date')
+    #df.show()
+    daily_values(df,pair)
+
+def read_fx_csv(path,pair,csv_schema):
+    df = spark.read.csv(path,schema=csv_schema)
     df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("timestamp").orderBy('date')
     #df.show()
     daily_values(df,pair)
@@ -65,7 +87,12 @@ for pair in pairs:
         for month in months:
             path = f"s3a://historical-forex-data/DAT_ASCII_{pair}_T_{year}{month}.csv"
             #path = "s3a:///historical-forex-data/"
-            read_csv(path,pair)
+            read_fx_csv(path,pair,fx_final_struc)
+path_gdp = f"s3a://historical-forex-data/GDP/GDP.csv"
+read_fx_csv(path_ir,fx_final_struc)
+path_ir = f"s3a://historical-forex-data/interest-rate/Interest_Rate.csv"
+read_fx_csv(path_ir,fx_final_struc)
+
 spark.stop()
 print("--- %s seconds ---" % (time.time() - start_time))
 
