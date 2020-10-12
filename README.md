@@ -2,7 +2,7 @@
 
 Monitering Money Movement.
 
-[Currency Flow Slides](https://docs.google.com/presentation/d/1CGO0-aTaNrPxvtQt1upfs92xHOfhBJdkzWmq1ynoBG4/edit?usp=sharing)and
+[Currency Flow Slides](https://docs.google.com/presentation/d/1CGO0-aTaNrPxvtQt1upfs92xHOfhBJdkzWmq1ynoBG4/edit?usp=sharing) and
 [Recorded Demo]()
 
 ## Introduction
