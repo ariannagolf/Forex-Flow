@@ -2,8 +2,8 @@
 
 Monitering Money Movement.
 
-[Currency Flow Slides](https://docs.google.com/presentation/d/1CGO0-aTaNrPxvtQt1upfs92xHOfhBJdkzWmq1ynoBG4/edit?usp=sharing) and
-[Recorded Demo]()
+[Currency Flow Slides](https://docs.google.com/presentation/d/1CGO0-aTaNrPxvtQt1upfs92xHOfhBJdkzWmq1ynoBG4/edit?usp=sharing), 
+[Recorded Demo](), and [Dashboard](http://ec2-54-193-31-247.us-west-1.compute.amazonaws.com:8050/)
 
 ## Introduction
 The foreign exchange market, also called the forex market is the largest financial market in the world. Over 6 trillion in US dollars are traded every day. 95% of currency trades are conducted by institutional investors like central banks, governments, and multinational corporations. 
