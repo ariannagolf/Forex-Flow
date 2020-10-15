@@ -1,30 +1,30 @@
 
 
 import dash
+from flask import Flask
 import dash_core_components as dcc
 import dash_html_components as html
 import pandas as pd
 import plotly.express as px
 import psycopg2
 import plotly.graph_objs as go
-from datetime import datetime as dt
-import re
-from dash.dependencies import Input, Output, State
-import time
-
-#print('Start of New Session')
+import config
+from dash.dependencies import Input, Output
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__,external_stylesheets=external_stylesheets,suppress_callback_exceptions=True)
 
+server = app.server
+
 # Connect to postgreSQL database
 pgconnect = psycopg2.connect(\
-    host = '***', \
-    port = ***,
-    database = '***',
-    user = '***',
-    password = '***')
+    host = config.db_host, \
+    port = config.db_port,
+    database = config.db_name,
+    user = config.db_user,
+    password = config.db_pass,
+    )
 pgcursor = pgconnect.cursor()
 
 # ------------------------ Import Data -------------------------------
@@ -47,7 +47,7 @@ ir_df = pd.DataFrame(pgcursor.fetchall(),columns=['location', 'value', 'date'])
 ir_df.index = pd.to_datetime(ir_df['date'])
 
 # Define the Date Range
-date_range = pd.date_range(start=fx_df.index.min(), end=fx_df.index.max())
+#date_range = pd.date_range(start=fx_df.index.min(), end=fx_df.index.max())
 
 # Upload country code conversion spreadsheet
 cc_file = 'data/country_code.csv'
@@ -122,49 +122,81 @@ def map_values(country):
     dataframe to populate Map
     """
     lst = relevant_pairs(country)
+    # Dictionary to store map values
     pair_dict = {}
     d_country = []
     d_state = []
     d_country_code = []
-    # Add user chosen country as the anchor key to pair_dict
+    d_country_ir = []
+    # Add user chosen country as the anchor to pair_dict
     d_country.append(country)
-    d_state.append('key')
+    d_state.append(0)
     d_country_code.append(code_from_country(country))
+    d_country_ir.append(ir_df[(ir_df['location'] == country) & (ir_df['date'] == ir_df.index[-2])]['value'][0])
+    #print(ir_df[(ir_df['date'] == end) & (ir_df['location'] == country)]['value'][0])
+    # Define date range to be 30 days
+    end = ir_df.index[-2]
+    start = ir_df.index[-30]
     for pair in lst:
-        # Define date range to be 30 days
-        start = date_range[-10]
-        end = date_range[-40]
         # Compute average values for given date range
-        start_ask = fx_df[(fx_df['date'] == start) & (fx_df['pair'] == 'AUDCAD')]['avg_bid'][0]
-        end_ask = fx_df[(fx_df['date'] == end) & (fx_df['pair'] == pair)]['avg_bid'][0]
+        start_val = fx_df[(fx_df['date'] == start) & (fx_df['pair'] == pair)]['avg_ask'][0]
+        end_val = fx_df[(fx_df['date'] == end) & (fx_df['pair'] == pair)]['avg_ask'][0]
+        # Compute percentage change
+        pcnt_change = (end_val-start_val)/(start_val) * 100
         base,quote = country_from_pair(pair)
         # When the net change change in price is positive 
-        if end_ask - start_ask > 0:
-            if quote == country:
-                d_country.append(base)
-                d_state.append('increase')
-                d_country_code.append(code_from_country(base))
-            else:
-                d_country.append(quote)
-                d_state.append('decrease')
-                d_country_code.append(code_from_country(quote))
-        # When the net change change in price is negative
+        # if pcnt_change > 0:
+        #     if quote == country:
+        #         d_country.append(base)
+        #         d_state.append('increase')
+        #         d_country_code.append(code_from_country(base))
+        #     else:
+        #         d_country.append(quote)
+        #         d_state.append('decrease')
+        #         d_country_code.append(code_from_country(quote))
+        # # When the net change change in price is negative
+        # else:
+        #     if quote == country:
+        #         d_country.append(base)
+        #         d_state.append('decrease')
+        #         d_country_code.append(code_from_country(base))
+        #     else:
+        #         d_country.append(quote)
+        #         d_state.append('increase')
+        #         d_country_code.append(code_from_country(quote))
+        if quote == country:
+            d_state.append(pcnt_change)
+            d_country.append(base)
+            d_country_code.append(code_from_country(base))
+            d_country_ir.append(ir_df[(ir_df['location'] == code_from_country(base)) & (ir_df['date'] == ir_df.index[-2])]['value'][0])
+            #d_country_ir.append(ir_df[ir_df['location'] == code_from_country(base)]['value'])
         else:
-            if quote == country:
-                d_country.append(base)
-                d_state.append('decrease')
-                d_country_code.append(code_from_country(base))
-            else:
-                d_country.append(quote)
-                d_state.append('increase')
-                d_country_code.append(code_from_country(quote))
+            d_state.append(-(pcnt_change))
+            d_country.append(quote)
+            d_country_code.append(code_from_country(quote))
+            d_country_ir.append(ir_df[(ir_df['location'] == code_from_country(quote)) & (ir_df['date'] == ir_df.index[-2])]['value'][0])
+            #d_country_ir.append(ir_df[ir_df['location'] == code_from_country(base)]['value'])
     pair_dict['country'] = d_country
-    pair_dict['state'] = d_state
+    pair_dict['percent change'] = d_state
     pair_dict['code'] = d_country_code
+    pair_dict['interest rate'] = d_country_ir
     # Create dataframe from data
-    df = pd.DataFrame(pair_dict, columns = ['country', 'state','code'])
+    df = pd.DataFrame(pair_dict, columns = ['country', 'percent change','code','interest rate'])
     return df
 
+def create_map(df):
+    fig = px.choropleth(
+        df, locations='code',
+        color='percent change',
+        hover_name='country',
+        hover_data=["code", "interest rate"],
+        projection='natural earth',
+        color_continuous_scale=px.colors.sequential.Plasma, #px.colors.diverging.RdYlGn,
+        template='plotly_white')
+    fig.update_layout(margin=dict(l=60, r=60, t=50, b=50))
+    return fig
+
+fig_map = create_map(map_values('USA'))
 
 
 # ------------------------------ Layout ----------------------------------
@@ -180,7 +212,11 @@ app.layout = html.Div([
             "border": "black",
             "primary": "black",
             "background": "black",
-            }
+            },
+    style ={
+        'font-family': "Optima",
+        'font-size': '1.75rem'
+    }
     )
 ])
 
@@ -222,11 +258,13 @@ def update_tabs(value):
                         children=[
                             dcc.Graph(
                                 id='timeseries', 
-                                config={'displayModeBar': False,'showAxisDragHandles':True}, 
-                                animate=True),
+                                config={'displayModeBar': False,'showAxisDragHandles':True,
+                                    "scrollZoom": True}, 
+                                animate=True,
+                                ),
                             dcc.Graph(
                                 id='interestseries', 
-                                config={'displayModeBar': False}, 
+                                config={'displayModeBar': False,}, 
                                 style={'margin-bottom': 100},
                                 animate=True),
                             ]
@@ -242,7 +280,7 @@ def update_tabs(value):
         return html.Div([
             html.H2('Currency Flow Map'),
             html.P('Choose a country from the dropdown below to see how its currency performed compared to other currencies over the past month!'),
-            html.P('How it works: When you choose a country (key), the map displays how the value of another country\'s currency changed in comparison to the chosen one within the last month. If the other country\'s currency gained value in comparison to the key currency, then the country is highlighted in green. If the other country\'s currency lost value in comparison , then the country is highlighted in red.'),
+            html.P('How it works: When you choose a country (anchor), the map shows how the selected country\'s currency performed relative to other countries. A country is highlighted green if it gained value in comparison to the anchor, and red if it lost value.'),
             html.Div([
                 dcc.Dropdown(
                     id="slct_country",
@@ -251,7 +289,7 @@ def update_tabs(value):
                     value='USA',
                     style={'width': "40%"}
                     ),
-                dcc.Graph(id='fx_map',figure={})
+                dcc.Graph(id='fx_map',figure=fig_map)
             ]),
             ])
 
@@ -264,16 +302,7 @@ def update_output(val_selected):
     price action values
     """
     df = map_values(val_selected)
-    #print(df)
-    fig = px.choropleth(
-        df, locations='code',
-        color='state',
-        hover_name='country',
-        hover_data = ir_df[(ir_df['location'] == val_selected) & (ir_df['date'] == date_range[-40])]['value'],
-        projection='natural earth')
-    fig.update_layout(title=dict(font=dict(size=28),x=0.5,xanchor='center'),
-                          margin=dict(l=60, r=60, t=50, b=50))
-    return fig
+    return create_map(df)
 
 # Populate forex price action chart
 @app.callback(
@@ -394,7 +423,7 @@ def update_graph(pair):
                 template='plotly_white',
                 paper_bgcolor='white', # need to change this to white?
                 plot_bgcolor='rgba(0, 0, 0, 0)',
-                margin={'b': 15},
+                margin={'b': 100},
                 hovermode='x',
                 autosize=True,
                 xaxis_rangeslider_visible=True,
@@ -445,9 +474,8 @@ def update_graph(pair):
                 yaxis_title='Interest Rate (%)',
                 ),
         }
-#        print('--- Runtime took %s seconds ---' % (time.time() - start_time))
     return figure
 
 if __name__ == '__main__':
-    app.run_server(debug=True, port=8051, host='ec2-3-101-124-56.us-west-1.compute.amazonaws.com')
+    app.run_server(debug=False, port=8050, host='ec2-54-193-31-247.us-west-1.compute.amazonaws.com')
     
