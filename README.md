@@ -3,7 +3,7 @@
 Monitering Money Movement.
 
 [Slidedeck](https://docs.google.com/presentation/d/1CGO0-aTaNrPxvtQt1upfs92xHOfhBJdkzWmq1ynoBG4/edit?usp=sharing), 
-[Recorded Demo](), and [Dashboard](http://ec2-54-193-31-247.us-west-1.compute.amazonaws.com:8050/)
+[Recorded Demo](), and [Dashboard](https://currencyflow.datatesting.me/)
 
 ## Introduction
 The foreign exchange market (also known as the forex market) is the largest financial market in the world. Over 6 trillion in US dollars are traded every day. 
