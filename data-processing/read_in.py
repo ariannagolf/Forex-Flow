@@ -51,7 +51,7 @@ def daily_values(df,pair):
     #df1 = df1.cache()
     #df1 = df1.orderBy("pair","date")
     mode = "append"
-    write_to_postgres(df1,"fx_data",url,mode,properties)
+    #write_to_postgres(df1,"fx_data",url,mode,properties)
 
 def read_fx_csv(path,pair,csv_schema):
     """ Read historical currency data and insert into dataframe"""
@@ -74,7 +74,7 @@ def read_ir_csv(path,csv_schema):
         .load(path)
     df = df.withColumn('date', f.to_date('time', 'yyyy-MM')).drop("indicator","subject","measure","frequency","flag_codes","time")
     mode = "overwrite"
-    write_to_postgres(df,"ir_data",url,mode,properties)
+    #write_to_postgres(df,"ir_data",url,mode,properties)
     #df.show()
 
 
@@ -101,16 +101,20 @@ if __name__ == '__main__':
 
     # Postgresql credentials
     mode = "overwrite"
-    url = "jdbc:postgresql://***:***/fx_db"
+    url = "jdbc:postgresql://10.0.0.4:5431/fx_db"
     properties = {
-        "user": "***",
-        "password": "***",
+        "user": "fx",
+        "password": "mydb",
         "driver": "org.postgresql.Driver"}
 
     # Pairs you want to process
-    pairs = ['GBPCAD']
+    #pairs = ['EURUSD']
+    #years = ['2020']
+    #months = ['09','10']
+    pairs = ['USDJPY','AUDJPY','CADCHF','CHFJPY']
     years = ['2020','2019','2018','2017','2016','2015','2014','2013','2012','2011','2010']
     months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    #months = ['01']
     # Read in Forex Data
     for pair in pairs:
         for year in years:
