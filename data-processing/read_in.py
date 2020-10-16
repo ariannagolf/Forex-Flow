@@ -7,6 +7,7 @@ import pyspark.sql.functions as f
 from pyspark.sql.window import Window
 from datetime import datetime
 import time
+import config
 
 start_time = time.time()
 #----------------------Defining Schemas----------------------#
@@ -51,7 +52,7 @@ def daily_values(df,pair):
     #df1 = df1.cache()
     #df1 = df1.orderBy("pair","date")
     mode = "append"
-    #write_to_postgres(df1,"fx_data",url,mode,properties)
+    write_to_postgres(df1,config.db_table,url,mode,properties)
 
 def read_fx_csv(path,pair,csv_schema):
     """ Read historical currency data and insert into dataframe"""
@@ -101,17 +102,17 @@ if __name__ == '__main__':
 
     # Postgresql credentials
     mode = "overwrite"
-    url = "jdbc:postgresql://10.0.0.4:5431/fx_db"
+    url = config.db_url
     properties = {
-        "user": "fx",
-        "password": "mydb",
+        "user": config.db_user,
+        "password": config.db_pass,
         "driver": "org.postgresql.Driver"}
 
     # Pairs you want to process
     #pairs = ['EURUSD']
     #years = ['2020']
     #months = ['09','10']
-    pairs = ['USDJPY','AUDJPY','CADCHF','CHFJPY']
+    pairs = ['USDPLN']
     years = ['2020','2019','2018','2017','2016','2015','2014','2013','2012','2011','2010']
     months = ['01','02','03','04','05','06','07','08','09','10','11','12']
     #months = ['01']
