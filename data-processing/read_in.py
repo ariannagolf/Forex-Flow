@@ -8,6 +8,7 @@ from pyspark.sql.window import Window
 from datetime import datetime
 import time
 import config
+import csv
 
 start_time = time.time()
 #----------------------Defining Schemas----------------------#
@@ -52,7 +53,7 @@ def daily_values(df,pair):
     #df1 = df1.cache()
     #df1 = df1.orderBy("pair","date")
     mode = "append"
-    write_to_postgres(df1,config.db_table,url,mode,properties)
+    write_to_postgres(df1,"fx_data",url,mode,properties)
 
 def read_fx_csv(path,pair,csv_schema):
     """ Read historical currency data and insert into dataframe"""
@@ -64,7 +65,6 @@ def read_fx_csv(path,pair,csv_schema):
         #.cache()
         #.withColumn("pid", f.spark_partition_id())
     df = df.withColumn('date', f.to_date('timestamp', 'yyyyMMdd')).drop("timestamp").orderBy('date').cache()
-    #df.withColumn("partition_id", f.spark_partition_id()).groupBy("partition_id").count().show()
     daily_values(df,pair)
 
 def read_ir_csv(path,csv_schema):
@@ -75,9 +75,15 @@ def read_ir_csv(path,csv_schema):
         .load(path)
     df = df.withColumn('date', f.to_date('time', 'yyyy-MM')).drop("indicator","subject","measure","frequency","flag_codes","time")
     mode = "overwrite"
-    #write_to_postgres(df,"ir_data",url,mode,properties)
-    #df.show()
+    write_to_postgres(df,"ir_data",url,mode,properties)
 
+def get_currency_pairs(filename):
+    """ Reads currency pair csv and returns list """
+    with open(filename,'r') as pair: 
+        csv_reader = csv.reader(pair)
+        header = next(csv_reader)
+        lst = [line for line in csv_reader]
+    return lst
 
 if __name__ == '__main__':
     start_time = time.time()
@@ -109,15 +115,12 @@ if __name__ == '__main__':
         "driver": "org.postgresql.Driver"}
 
     # Pairs you want to process
-    #pairs = ['EURUSD']
-    #years = ['2020']
-    #months = ['09','10']
-    pairs = ['USDPLN']
+    filename = "currency_pairs.csv"
+    curr_lst = get_currency_pairs(filename)
     years = ['2020','2019','2018','2017','2016','2015','2014','2013','2012','2011','2010']
     months = ['01','02','03','04','05','06','07','08','09','10','11','12']
-    #months = ['01']
     # Read in Forex Data
-    for pair in pairs:
+    for pair in curr_lst:
         for year in years:
             for month in months:
                 path = f"s3a://historical-forex-data/DAT_ASCII_{pair}_T_{year}{month}.csv"
@@ -126,7 +129,7 @@ if __name__ == '__main__':
                 except:
                     pass
 
-    # Read in Interest Rate Data
+    Read in Interest Rate Data
     path_ir = f"s3a://historical-forex-data/interest-rate/Interest_Rate.csv"
     read_ir_csv(path_ir,ir_final_struc)
 
