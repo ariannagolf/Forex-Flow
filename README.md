@@ -14,11 +14,15 @@ Monitering Money Movement.
 6. [Setup](README.md#setup)
 
 ## Introduction
-The foreign exchange market (also known as the forex market) is the largest financial market in the world. Over 6 trillion in US dollars are traded every day. 
+The Foreign Exchange market (ie. the Currency Market) is the largest financial market in the world. Over 6 trillion in US dollars are traded every day. 
 
-The currency market is crucial to multinational corporations who want to protect themselves from the risk associated with foreign currency transactions. When creating long term business and investment strategies, it is important for these corporations to keep track of not just currency prices, but also changes in interest rates since there is a strong relationship between the two. However, most forex trading platforms do not provide easy access to interest rate data. 
+The currency market is a crucial tool for multinational corporations who want to protect themselves from the risk associated with foreign currency transactions. When creating long term business and investment strategies, it is important for these corporations to keep track of not just currency prices, but also changes in interest rates since there is a strong relationship between the two. However, forex trading platforms do not provide easy access to interest rate data. 
 
-Currency Flow is a platform that synthesizes data to help corporate researchers and analysts determine how forex price action responds to a global event. To do so, it aggregates historical forex data and interest rates for a chosen timeframe to get a snapshot of the underlying movement of capital between economies. Currency Flow leverages Airflow to regularly update currency and interest rate data to provide timely data for recalculating percent changes in currency prices. 
+Currency Flow is a platform that synthesizes data to help corporate researchers and analysts determine how forex price action responds to a global event. To do so, it aggregates historical forex data and interest rates for a chosen timeframe to get a snapshot of the underlying movement of capital between economies. 
+
+<!---  
+Currency Flow leverages Airflow to regularly update currency and interest rate data to provide timely data for recalculating percent changes in currency prices. 
+--->
 
 Note: Currency Flow processes ~200GB of raw Forex data for the period January 2010 to October 2020. 
 
