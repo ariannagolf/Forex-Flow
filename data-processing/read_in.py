@@ -108,17 +108,19 @@ if __name__ == '__main__':
 
     # Postgresql credentials
     mode = "overwrite"
-    url = config.db_url
+    url = "jdbc:postgresql://10.0.0.4:5431/fx_db"
     properties = {
-        "user": config.db_user,
-        "password": config.db_pass,
+        "user": "fx",
+        "password": "mydb",
         "driver": "org.postgresql.Driver"}
 
     # Pairs you want to process
     filename = "currency_pairs.csv"
     curr_lst = get_currency_pairs(filename)
+    # Timeframe 
     years = ['2020','2019','2018','2017','2016','2015','2014','2013','2012','2011','2010']
     months = ['01','02','03','04','05','06','07','08','09','10','11','12']
+    
     # Read in Forex Data
     for pair in curr_lst:
         for year in years:
@@ -129,7 +131,7 @@ if __name__ == '__main__':
                 except:
                     pass
 
-    Read in Interest Rate Data
+    #Read in Interest Rate Data
     path_ir = f"s3a://historical-forex-data/interest-rate/Interest_Rate.csv"
     read_ir_csv(path_ir,ir_final_struc)
 
