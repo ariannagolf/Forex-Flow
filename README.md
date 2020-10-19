@@ -18,15 +18,16 @@ The foreign exchange market (also known as the forex market) is the largest fina
 
 The currency market is crucial to multinational corporations who want to protect themselves from the risk associated with foreign currency transactions. When creating long term business and investment strategies, it is important for these corporations to keep track of not just currency prices, but also changes in interest rates since there is a strong relationship between the two. However, most forex trading platforms do not provide easy access to interest rate data. 
 
-Currency Flow is a data platform that synthesizes data that helps corporate researchers and analysts determine how forex price action responds to a global event. To do so, it aggregates historical forex data and interest rates for a chosen timeframe to get a snapshot of the underlying movement of capital between economies. Currency Flow leverages Airflow to regularly update currency and interest rate data to provide timely data for recalculating percent changes in currency prices. 
+Currency Flow is a platform that synthesizes data to help corporate researchers and analysts determine how forex price action responds to a global event. To do so, it aggregates historical forex data and interest rates for a chosen timeframe to get a snapshot of the underlying movement of capital between economies. Currency Flow leverages Airflow to regularly update currency and interest rate data to provide timely data for recalculating percent changes in currency prices. 
 
 Note: Currency Flow processes ~200GB of raw Forex data for the period January 2010 to October 2020. 
 
 ## Architecture
-![Test Image 8](https://raw.githubusercontent.com/ariannagolf/Forex-Flow/master/architecture.png)
+![Test Image 8](https://raw.githubusercontent.com/ariannagolf/Forex-Flow/master/images/architecture.png)
+
 
 ## Dataset
-Historical currency data starting from 2000 is available through [histdata.com](https://www.histdata.com/download-free-forex-historical-data/?/ascii/tick-data-quotes/). Some currency pairs have more data then others. The data is available in a variety of formats but the data used for this project are ascii tick data. Interest rate data since 1956 is available from [OECD](https://data.oecd.org/interest/short-term-interest-rates.htm).
+Historical currency data starting from 2000 is available from [histdata.com](https://www.histdata.com/download-free-forex-historical-data/?/ascii/tick-data-quotes/). Note that some currency pairs have more data then others. The data is available in a variety of formats but the data used for this project are ascii tick data quotes which are non-aggregated trade quotes. Interest rate data since 1956 is available from [OECD](https://data.oecd.org/interest/short-term-interest-rates.htm).
 
 ## Engineering Challenges
 I tested and tuned various methods and configurations to optimize the Spark aspect of the pipeline. The first effective method I found was pre-defining a static schema and utilizing Spark functions as opposed to UDF wrappers. Repartitioning and caching dataframes before running Spark SQL queries brought run-time down to 8 minutes. Also tuning partition parameters led to further decreased job time. And this resulted in a total 34% reduction compared to baseline. 
