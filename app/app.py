@@ -144,26 +144,6 @@ def map_values(country):
         # Compute percentage change
         pcnt_change = (end_val-start_val)/(start_val) * 100
         base,quote = country_from_pair(pair)
-        # When the net change change in price is positive 
-        # if pcnt_change > 0:
-        #     if quote == country:
-        #         d_country.append(base)
-        #         d_state.append('increase')
-        #         d_country_code.append(code_from_country(base))
-        #     else:
-        #         d_country.append(quote)
-        #         d_state.append('decrease')
-        #         d_country_code.append(code_from_country(quote))
-        # # When the net change change in price is negative
-        # else:
-        #     if quote == country:
-        #         d_country.append(base)
-        #         d_state.append('decrease')
-        #         d_country_code.append(code_from_country(base))
-        #     else:
-        #         d_country.append(quote)
-        #         d_state.append('increase')
-        #         d_country_code.append(code_from_country(quote))
         if quote == country:
             d_state.append(pcnt_change)
             d_country.append(base)
@@ -477,5 +457,5 @@ def update_graph(pair):
     return figure
 
 if __name__ == '__main__':
-    app.run_server(debug=False, port=8050, host='ec2-54-193-31-247.us-west-1.compute.amazonaws.com')
+    app.run_server(debug=False, port=8050, host='ec2-54-193-31-247.us-west-1.compute.amazonaws.com',dev_tools_ui=False)
     
