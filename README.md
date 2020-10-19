@@ -14,9 +14,7 @@ Monitering Money Movement.
 6. [Setup](README.md#setup)
 
 ## Introduction
-The Foreign Exchange market (ie. the Currency Market) is the largest financial market in the world. Over 6 trillion in US dollars are traded every day. 
-
-The currency market is a crucial tool for multinational corporations who want to protect themselves from the risk associated with foreign currency transactions. When creating long term business and investment strategies, it is important for these corporations to keep track of not just currency prices, but also changes in interest rates since there is a strong relationship between the two. However, forex trading platforms do not provide easy access to interest rate data. 
+The Foreign Exchange market (ie. the Currency Market) is the largest financial market in the world and over 6 trillion in US dollars are traded every day. This market is a crucial tool for multinational corporations who want to protect themselves from the risk associated with foreign currency transactions. When creating long term business and investment strategies, it is important for these corporations to keep track of not just currency prices, but also changes in interest rates since there is a strong relationship between the two. However, forex trading platforms do not provide easy access to interest rate data. 
 
 Currency Flow is a platform that synthesizes data to help corporate researchers and analysts determine how forex price action responds to a global event. To do so, it aggregates historical forex data and interest rates for a chosen timeframe to get a snapshot of the underlying movement of capital between economies. 
 
