@@ -70,4 +70,4 @@ For data ingestion, run the data_upload.py script. Specify the date range you ar
 - Unzips the files (.zip -> .csv)
 - Stores monthly csv files to specified S3 bucket
 #### Processing
-I set up 1 master node and 2 workers which are m5.large EC2 instances (18.04 Ubuntu,2 vCPUs, 8GB). Setup Spark 2.4.7 using these [instructions](https://blog.insightdatascience.com/simply-install-spark-cluster-mode-341843a52b88). Use run.sh to read in and process data for this application.
+Setup Spark 2.4.7 using these [instructions](https://blog.insightdatascience.com/simply-install-spark-cluster-mode-341843a52b88). I set up 1 master node and 2 workers which are m5.large EC2 instances (18.04 Ubuntu,2 vCPUs, 8GB). Navigate to your master instance and use run.sh to read in and process data for this application.
