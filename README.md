@@ -2,7 +2,7 @@
 
 Monitering Money Movement.
 
-[Recorded Presentation](https://youtu.be/ZoX-qfXfeXo), [Slidedeck](https://docs.google.com/presentation/d/1CGO0-aTaNrPxvtQt1upfs92xHOfhBJdkzWmq1ynoBG4/edit?usp=sharing), 
+[Recorded Presentation](https://youtu.be/ZoX-qfXfeXo), [Slidedeck](https://docs.google.com/presentation/d/1ybkVHcBrd_KthJQNvuPqCWZcRdyfinSpWS37k2zuiec/edit?usp=sharing), 
 [Recorded Dashboard Demo](https://youtu.be/21LVI_MPG7M), and [Dashboard](https://currencyflow.datatesting.me/)
 
 ## Table of Contents
